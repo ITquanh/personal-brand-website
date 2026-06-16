@@ -1,0 +1,185 @@
+// schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// NextAuth.js 必需的模型
+model Account {
+  id                String  @id @default(uuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(uuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// 业务模型
+model Project {
+  id        String  @id @default(uuid())
+  slug      String  @unique // 用于友好的 URL
+  titleZh   String
+  titleEn   String? // 可为空，表示未翻译
+  summaryZh String // 业务价值一句话摘要
+  summaryEn String? // 可为空，表示未翻译
+  techStack String // JSON array stored as string for SQLite
+
+  architectureZh   String? // 架构或难点解析
+  architectureEn   String? // 可为空，表示未翻译
+  quantifiedImpact String? // 量化指标，如 "节约 80% 报表工时"
+
+  githubUrl  String?
+  demoUrl    String?
+  imageUrl   String? // 项目封面图
+  isFeatured Boolean @default(false) // 是否在 Bento Grid 首页展示
+
+  // 翻译状态
+  translationStatus String    @default("untranslated") // untranslated, translated, reviewed
+  translatedAt      DateTime? // 翻译完成时间
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Post {
+  id        String  @id @default(uuid())
+  slug      String  @unique
+  titleZh   String
+  titleEn   String? // 可为空，表示未翻译
+  contentZh String // 支持 Markdown
+  contentEn String? // 可为空，表示未翻译
+  summaryZh String? // 摘要
+  summaryEn String? // 可为空，表示未翻译
+  tags      String // JSON array stored as string for SQLite
+  imageUrl  String? // 文章封面图
+  published Boolean @default(false)
+  readTime  Int // 预估阅读时间(分钟)
+  viewCount Int     @default(0) // 阅读次数
+
+  // 翻译状态
+  translationStatus String    @default("untranslated") // untranslated, translated, reviewed
+  translatedAt      DateTime? // 翻译完成时间
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Skill {
+  id          String  @id @default(uuid())
+  name        String  @unique // 技术名称（如 "Python", "Next.js"）
+  category    String // 分类（AI工具、后端、前端、基础设施等）
+  proficiency Int // 熟练度（1-100）
+  description String? // 描述
+  projects    String // JSON array stored as string for SQLite
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Visit {
+  id        String   @id @default(uuid())
+  path      String // 访问路径
+  userAgent String? // 浏览器信息
+  ip        String? // IP地址（匿名化处理）
+  country   String? // 国家
+  referer   String? // 来源页面
+  createdAt DateTime @default(now())
+}
+
+model Comment {
+  id       String  @id @default(uuid())
+  postId   String // 关联的文章ID
+  userId   String // 评论者GitHub ID
+  userName String // 评论者GitHub用户名
+  content  String // 评论内容
+  approved Boolean @default(false) // 是否审核通过
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TimelineEvent {
+  id             String   @id @default(uuid())
+  date           String
+  titleZh        String
+  titleEn        String?
+  companyZh      String
+  companyEn      String?
+  descriptionZh  String
+  descriptionEn  String?
+  achievementsZh String // JSON array
+  achievementsEn String? // JSON array
+  type           String // 'work' | 'education'
+  order          Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model SiteConfig {
+  id                String  @id @default("global")
+  name              String?
+  nameEn            String?
+  jobTitle          String?
+  jobTitleEn        String?
+  bio               String?
+  bioEn             String?
+  siteTitle         String?
+  siteTitleEn       String?
+  siteDescription   String?
+  siteDescriptionEn String?
+  githubUrl         String?
+  email             String?
+  linkedinUrl       String?
+
+  yearsExperience   String?
+  projectsCompleted String?
+  clientsServed     String?
+  
+  terminalRole           String?
+  terminalWelcomeMessage String?
+  terminalSkills         String?
+
+  updatedAt DateTime @updatedAt
+}

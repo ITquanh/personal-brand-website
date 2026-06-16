@@ -1,0 +1,16 @@
+{
+  "name": "个人技术品牌",
+  "short_name": "TechBrand",
+  "description": "集极客美学与高信息密度于一体的个人全栈数字空间",
+  "start_url": "/zh",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    }
+  ]
+}
