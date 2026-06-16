@@ -29,7 +29,7 @@ export default function ProjectWall({
   techFilter = null,
 }: ProjectWallProps) {
   const [projects, setProjects] = useState<Project[]>(initialProjects);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(initialProjects.length > 0 ? 1 : 0);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState(false);
