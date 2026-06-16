@@ -144,7 +144,7 @@ export async function PUT(
         contentEn: body.contentEn,
         summaryZh: body.summaryZh,
         summaryEn: body.summaryEn,
-        tags: body.tags,
+        tags: body.tags ? (Array.isArray(body.tags) ? JSON.stringify(body.tags) : body.tags) : undefined,
         imageUrl: body.imageUrl,
         published: body.published,
         readTime,

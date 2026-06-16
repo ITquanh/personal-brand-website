@@ -148,7 +148,7 @@ export async function POST(request: NextRequest) {
         contentEn: body.contentEn,
         summaryZh: body.summaryZh,
         summaryEn: body.summaryEn,
-        tags: body.tags || [],
+        tags: Array.isArray(body.tags) ? JSON.stringify(body.tags) : body.tags || "[]",
         imageUrl: body.imageUrl,
         published: body.published || false,
         readTime,

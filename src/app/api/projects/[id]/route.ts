@@ -127,7 +127,7 @@ export async function PUT(
         titleEn: body.titleEn,
         summaryZh: body.summaryZh,
         summaryEn: body.summaryEn,
-        techStack: body.techStack,
+        techStack: body.techStack ? (Array.isArray(body.techStack) ? JSON.stringify(body.techStack) : body.techStack) : undefined,
         architectureZh: body.architectureZh,
         architectureEn: body.architectureEn,
         quantifiedImpact: body.quantifiedImpact,

@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
         titleEn: body.titleEn,
         summaryZh: body.summaryZh,
         summaryEn: body.summaryEn,
-        techStack: body.techStack || [],
+        techStack: Array.isArray(body.techStack) ? JSON.stringify(body.techStack) : body.techStack || "[]",
         architectureZh: body.architectureZh,
         architectureEn: body.architectureEn,
         quantifiedImpact: body.quantifiedImpact,
