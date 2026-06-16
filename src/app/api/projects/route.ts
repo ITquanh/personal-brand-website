@@ -55,20 +55,11 @@ export async function GET(request: NextRequest) {
 
     // 根据语言返回对应的字段
     const formattedProjects = projects.map((project) => ({
-      id: project.id,
-      slug: project.slug,
+      ...project,
       title: locale === 'en' && project.titleEn ? project.titleEn : project.titleZh,
       summary: locale === 'en' && project.summaryEn ? project.summaryEn : project.summaryZh,
       techStack: safeParseJson(project.techStack, []),
       architecture: locale === 'en' && project.architectureEn ? project.architectureEn : project.architectureZh,
-      quantifiedImpact: project.quantifiedImpact,
-      githubUrl: project.githubUrl,
-      demoUrl: project.demoUrl,
-      imageUrl: project.imageUrl,
-      isFeatured: project.isFeatured,
-      translationStatus: project.translationStatus,
-      createdAt: project.createdAt,
-      updatedAt: project.updatedAt,
     }));
 
     return NextResponse.json({

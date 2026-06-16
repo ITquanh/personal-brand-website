@@ -64,18 +64,10 @@ export async function GET(request: NextRequest) {
 
     // 根据语言返回对应的字段
     const formattedPosts = posts.map((post) => ({
-      id: post.id,
-      slug: post.slug,
+      ...post,
       title: locale === 'en' && post.titleEn ? post.titleEn : post.titleZh,
       summary: locale === 'en' && post.summaryEn ? post.summaryEn : post.summaryZh,
       tags: safeParseJson(post.tags, []),
-      imageUrl: post.imageUrl,
-      published: post.published,
-      readTime: post.readTime,
-      viewCount: post.viewCount,
-      translationStatus: post.translationStatus,
-      createdAt: post.createdAt,
-      updatedAt: post.updatedAt,
     }));
 
     return NextResponse.json({
