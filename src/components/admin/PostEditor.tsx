@@ -336,6 +336,21 @@ export default function PostEditor({
           />
         </div>
 
+        {/* 英文摘要 */}
+        <div className="md:col-span-2">
+          <label className="block text-sm font-medium mb-2">
+            英文摘要
+          </label>
+          <textarea
+            name="summaryEn"
+            value={formData.summaryEn}
+            onChange={handleChange}
+            rows={2}
+            className="w-full px-4 py-2 bg-card-bg border border-card-border rounded-lg focus:outline-none focus:border-accent-green"
+            placeholder="Article English Summary"
+          />
+        </div>
+
         {/* 标签 */}
         <div className="md:col-span-2">
           <label className="block text-sm font-medium mb-2">
