@@ -98,6 +98,30 @@ function RadarChart({ skills }: { skills: Skill[] }) {
   }, {} as Record<string, Skill[]>);
 
   const categoryNames = Object.keys(categories);
+
+  if (categoryNames.length < 3) {
+    return (
+      <div className="w-full h-full flex flex-col gap-4 overflow-y-auto pr-2 py-2">
+        {skills.map((skill) => (
+          <div key={skill.id} className="space-y-1">
+            <div className="flex justify-between items-center text-sm">
+              <span className="font-semibold text-foreground/80">{skill.name}</span>
+              <span className="text-accent-green font-bold font-mono">{skill.proficiency}%</span>
+            </div>
+            <div className="h-2 bg-card-bg/60 rounded-full overflow-hidden border border-card-border/30">
+              <motion.div
+                initial={{ width: 0 }}
+                whileInView={{ width: `${skill.proficiency}%` }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                viewport={{ once: true }}
+                className="h-full bg-accent-green rounded-full"
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
   const centerX = 150;
   const centerY = 150;
   const radius = 120;
