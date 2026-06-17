@@ -139,14 +139,18 @@ export default function PostList({ posts, locale, dict }: PostListProps) {
                 <div className="flex-shrink-0">
                   <span
                     className={`text-xs px-2 py-1 rounded-full ${
-                      post.translationStatus === 'translated'
-                        ? 'bg-green-500/20 text-green-400'
+                      post.translationStatus === 'reviewed'
+                        ? 'bg-purple-500/20 text-purple-400'
+                        : post.translationStatus === 'translated'
+                        ? 'bg-blue-500/20 text-blue-400'
                         : 'bg-yellow-500/20 text-yellow-400'
                     }`}
                   >
-                    {post.translationStatus === 'translated'
-                      ? '已翻译'
-                      : '未翻译'}
+                    {post.translationStatus === 'reviewed'
+                      ? (dict.projects?.statusReviewed || 'Reviewed')
+                      : post.translationStatus === 'translated'
+                      ? (dict.projects?.statusTranslated || 'Translated')
+                      : (dict.projects?.statusUntranslated || 'Untranslated')}
                   </span>
                 </div>
               )}
