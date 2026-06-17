@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { recordVisit, getAnalyticsStats, getPageViews, getTodayVisits } from '@/lib/analytics';
 
+export const dynamic = 'force-dynamic';
+
 // POST /api/analytics - 记录访问
 export async function POST(request: NextRequest) {
   try {
@@ -73,10 +75,15 @@ export async function GET(request: NextRequest) {
         todayVisits,
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('获取统计数据失败:', error);
     return NextResponse.json(
-      { success: false, error: '获取统计数据失败' },
+      { 
+        success: false, 
+        error: '获取统计数据失败',
+        message: error?.message || String(error),
+        stack: error?.stack
+      },
       { status: 500 }
     );
   }
