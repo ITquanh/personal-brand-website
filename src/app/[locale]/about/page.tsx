@@ -170,7 +170,7 @@ export default function AboutPage({
             <h2 className="text-3xl font-bold mb-12 text-center">
               {dict.about.timeline}
             </h2>
-            <Timeline events={configData.timeline} dict={dict} />
+            <Timeline events={configData.timeline} dict={dict} locale={locale} />
           </motion.div>
         </div>
       </section>

@@ -16,9 +16,10 @@ interface TimelineEvent {
 interface TimelineProps {
   events: TimelineEvent[];
   dict: any;
+  locale?: string;
 }
 
-export default function Timeline({ events, dict }: TimelineProps) {
+export default function Timeline({ events, dict, locale }: TimelineProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   return (
@@ -35,6 +36,7 @@ export default function Timeline({ events, dict }: TimelineProps) {
             index={index}
             isLeft={index % 2 === 0}
             dict={dict}
+            locale={locale}
           />
         ))}
       </div>
@@ -47,12 +49,22 @@ function TimelineItem({
   index,
   isLeft,
   dict,
+  locale,
 }: {
-  event: TimelineEvent;
+  event: any;
   index: number;
   isLeft: boolean;
   dict: any;
+  locale?: string;
 }) {
+  const isEn = locale === 'en';
+  const displayTitle = isEn && event.titleEn ? event.titleEn : (event.title || event.titleZh);
+  const displayCompany = isEn && event.companyEn ? event.companyEn : (event.company || event.companyZh);
+  const displayDescription = isEn && event.descriptionEn ? event.descriptionEn : (event.description || event.descriptionZh);
+  const displayAchievements = isEn && event.achievementsEn && event.achievementsEn.length > 0 && event.achievementsEn.some((a: string) => a.trim() !== '')
+    ? event.achievementsEn
+    : (event.achievements || event.achievementsZh || []);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 50 }}
@@ -60,7 +72,7 @@ function TimelineItem({
       transition={{ duration: 0.5, delay: index * 0.1 }}
       viewport={{ once: true, margin: '-100px' }}
       role="listitem"
-      aria-label={`${event.date} - ${event.title}`}
+      aria-label={`${event.date} - ${displayTitle}`}
       className={`relative flex items-start ${
         isLeft ? 'md:flex-row' : 'md:flex-row-reverse'
       }`}
@@ -83,23 +95,23 @@ function TimelineItem({
           {/* 类型标签 */}
           <div className="inline-block text-xs px-2 py-1 rounded-full bg-card-bg text-foreground/60 mb-3">
             {event.type === 'work'
-              ? '💼 工作经历'
+              ? (isEn ? '💼 Work Experience' : '💼 工作经历')
               : event.type === 'education'
-              ? '🎓 教育背景'
-              : '🚀 项目经历'}
+              ? (isEn ? '🎓 Education' : '🎓 教育背景')
+              : (isEn ? '🚀 Project Experience' : '🚀 项目经历')}
           </div>
 
           {/* 标题和公司 */}
-          <h3 className="text-lg font-bold mb-1">{event.title}</h3>
-          {event.company && (
-            <p className="text-foreground/60 text-sm mb-3">{event.company}</p>
+          <h3 className="text-lg font-bold mb-1">{displayTitle}</h3>
+          {displayCompany && (
+            <p className="text-foreground/60 text-sm mb-3">{displayCompany}</p>
           )}
 
           {/* 描述 */}
-          <p className="text-foreground/80 text-sm mb-4">{event.description}</p>
+          <p className="text-foreground/80 text-sm mb-4">{displayDescription}</p>
 
           {/* 成就指标（悬停显示） */}
-          {event.achievements && event.achievements.length > 0 && (
+          {displayAchievements && displayAchievements.length > 0 && (
             <div className="overflow-hidden">
               <motion.div
                 initial={{ height: 0, opacity: 0 }}
@@ -108,9 +120,9 @@ function TimelineItem({
                 className="space-y-2"
               >
                 <p className="text-xs text-foreground/40 font-medium">
-                  主要成就：
+                  {isEn ? 'Key Achievements:' : '主要成就：'}
                 </p>
-                {event.achievements.map((achievement, i) => (
+                {displayAchievements.map((achievement: string, i: number) => (
                   <div
                     key={i}
                     className="flex items-start gap-2 text-sm text-accent-green"
@@ -124,9 +136,9 @@ function TimelineItem({
           )}
 
           {/* 悬停提示 */}
-          {event.achievements && event.achievements.length > 0 && (
+          {displayAchievements && displayAchievements.length > 0 && (
             <div className="mt-3 text-xs text-foreground/40 group-hover:hidden">
-              悬停查看详情 ↓
+              {isEn ? 'Hover to view details ↓' : '悬停查看详情 ↓'}
             </div>
           )}
         </div>
