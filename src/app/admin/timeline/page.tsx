@@ -141,42 +141,78 @@ export default function TimelineEditorPage() {
     if (!event) return;
 
     setTranslatingId(id);
+    setError('');
+    setSuccess('');
     try {
-      const fields = [
-        { zh: event.title, setter: (v: string) => updateEvent(id, 'titleEn', v) },
-        { zh: event.company, setter: (v: string) => updateEvent(id, 'companyEn', v) },
-        { zh: event.description, setter: (v: string) => updateEvent(id, 'descriptionEn', v) },
-      ];
+      // 收集所有需要翻译的非空文本
+      const items: { text: string; type: 'title' | 'company' | 'description' | 'achievement'; index?: number }[] = [];
 
-      for (const field of fields) {
-        if (!field.zh.trim()) continue;
-        const res = await fetch('/api/translate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: field.zh, targetLang: 'en' }),
-        });
-        const data = await res.json();
-        if (data.success && data.translated) {
-          field.setter(data.translated);
+      if (event.title.trim()) {
+        items.push({ text: event.title, type: 'title' });
+      }
+      if (event.company.trim()) {
+        items.push({ text: event.company, type: 'company' });
+      }
+      if (event.description.trim()) {
+        items.push({ text: event.description, type: 'description' });
+      }
+      event.achievements.forEach((ach, index) => {
+        if (ach.trim()) {
+          items.push({ text: ach, type: 'achievement', index });
         }
+      });
+
+      if (items.length === 0) {
+        setSuccess('没有需要翻译的内容');
+        return;
       }
 
-      // 翻译成就列表
-      for (let i = 0; i < event.achievements.length; i++) {
-        const ach = event.achievements[i];
-        if (!ach.trim()) continue;
-        const res = await fetch('/api/translate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: ach, targetLang: 'en' }),
-        });
-        const data = await res.json();
-        if (data.success && data.translated) {
-          updateAchievement(id, i, data.translated, true);
-        }
+      const res = await fetch('/api/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: items.map(item => item.text),
+          targetLang: 'en',
+          sourceLang: 'zh',
+        }),
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text().catch(() => '翻译请求失败');
+        throw new Error(`服务器错误 (${res.status}): ${errorText}`);
       }
-    } catch {
-      // 翻译失败静默处理
+
+      const result = await res.json();
+      if (result.success && result.data?.translations) {
+        // 创建一个新的 event 对象来更新 state
+        let updatedEvent = { ...event };
+        const achievementsEn = [...event.achievementsEn];
+
+        items.forEach((item, idx) => {
+          const translated = result.data.translations[idx];
+          if (translated) {
+            if (item.type === 'title') {
+              updatedEvent.titleEn = translated;
+            } else if (item.type === 'company') {
+              updatedEvent.companyEn = translated;
+            } else if (item.type === 'description') {
+              updatedEvent.descriptionEn = translated;
+            } else if (item.type === 'achievement' && item.index !== undefined) {
+              achievementsEn[item.index] = translated;
+            }
+          }
+        });
+
+        updatedEvent.achievementsEn = achievementsEn;
+
+        // 更新 events state
+        setEvents(prev => prev.map(e => e.id === id ? updatedEvent : e));
+        setSuccess('履历翻译完成！请检查英文内容后保存。');
+      } else {
+        throw new Error(result.error || '翻译失败');
+      }
+    } catch (err: any) {
+      setError(err.message || '翻译失败，请重试');
     } finally {
       setTranslatingId(null);
     }

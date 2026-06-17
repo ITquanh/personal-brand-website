@@ -80,6 +80,7 @@ export default function ProfilePage() {
   const handleTranslateAll = async () => {
     setTranslating(true);
     setError('');
+    setSuccess('');
     try {
       const fieldsToTranslate = [
         { key: 'name', zh: data.name },
@@ -87,54 +88,78 @@ export default function ProfilePage() {
         { key: 'bio', zh: data.bio },
         { key: 'siteTitle', zh: data.siteTitle },
         { key: 'siteDescription', zh: data.siteDescription },
-      ];
+      ].filter(f => f.zh.trim() !== '');
 
-      const updates: Partial<ProfileData> = {};
-
-      for (const field of fieldsToTranslate) {
-        if (!field.zh.trim()) continue;
-        try {
-          const res = await fetch('/api/translate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: field.zh, targetLang: 'en' }),
-          });
-          const result = await res.json();
-          if (result.success && result.translated) {
-            const enKey = (field.key + 'En') as keyof ProfileData;
-            (updates as any)[enKey] = result.translated;
-          }
-        } catch {
-          // 单个字段翻译失败不影响其他字段
-        }
+      if (fieldsToTranslate.length === 0) {
+        setSuccess('没有需要翻译的内容');
+        return;
       }
 
-      setData(prev => ({ ...prev, ...updates }));
-      setSuccess('翻译完成！请检查英文内容后保存。');
-    } catch (err) {
-      setError('翻译失败，请重试');
+      const res = await fetch('/api/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: fieldsToTranslate.map(f => f.zh),
+          targetLang: 'en',
+          sourceLang: 'zh',
+        }),
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text().catch(() => '翻译请求失败');
+        throw new Error(`服务器错误 (${res.status}): ${errorText}`);
+      }
+
+      const result = await res.json();
+      if (result.success && result.data?.translations) {
+        const updates: Partial<ProfileData> = {};
+        fieldsToTranslate.forEach((field, index) => {
+          const translated = result.data.translations[index];
+          if (translated) {
+            const enKey = (field.key + 'En') as keyof ProfileData;
+            (updates as any)[enKey] = translated;
+          }
+        });
+        setData(prev => ({ ...prev, ...updates }));
+        setSuccess('一键翻译完成！请检查英文内容后保存。');
+      } else {
+        throw new Error(result.error || '翻译失败');
+      }
+    } catch (err: any) {
+      setError(err.message || '翻译失败，请重试');
     } finally {
       setTranslating(false);
     }
   };
 
   // 翻译单个字段
-  const translateField = async (zhKey: keyof ProfileData, enKey: keyof ProfileData) => {
+  const translateField = async (zhKey: keyof ProfileData, enKey: keyof ProfileData, label: string) => {
     const text = data[zhKey] as string;
     if (!text?.trim()) return;
 
+    setError('');
+    setSuccess('');
     try {
       const res = await fetch('/api/translate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, targetLang: 'en' }),
+        body: JSON.stringify({ text, targetLang: 'en', sourceLang: 'zh' }),
       });
-      const result = await res.json();
-      if (result.success && result.translated) {
-        setData(prev => ({ ...prev, [enKey]: result.translated }));
+
+      if (!res.ok) {
+        const errorText = await res.text().catch(() => '翻译请求失败');
+        throw new Error(`服务器错误 (${res.status}): ${errorText}`);
       }
-    } catch {
-      // 翻译失败静默处理
+
+      const result = await res.json();
+      if (result.success && result.data?.translated) {
+        setData(prev => ({ ...prev, [enKey]: result.data.translated }));
+        setSuccess(`"${label}" 翻译完成！`);
+      } else {
+        throw new Error(result.error || '翻译失败');
+      }
+    } catch (err: any) {
+      setError(`"${label}" 翻译失败: ${err.message || '未知错误'}`);
     }
   };
 
@@ -225,7 +250,7 @@ export default function ProfilePage() {
                 <div className="flex items-center justify-between mb-2">
                   <label className="text-sm font-medium">🇬🇧 {label}（English）</label>
                   <button
-                    onClick={() => translateField(zhKey, enKey)}
+                    onClick={() => translateField(zhKey, enKey, label)}
                     className="text-xs text-accent-purple hover:underline"
                   >
                     🌐 翻译此项

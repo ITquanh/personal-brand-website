@@ -38,8 +38,8 @@ function checkRateLimit(userId: string): boolean {
     return true;
   }
 
-  if (limit.count >= 10) {
-    // 每分钟最多10次
+  if (limit.count >= 60) {
+    // 每分钟最多60次
     return false;
   }
 
@@ -191,15 +191,18 @@ async function translateWithDeepL(options: TranslateOptions): Promise<TranslateR
 // 主翻译函数
 export async function translate(
   options: TranslateOptions,
-  userId?: string
+  userId?: string,
+  skipRateLimit = false
 ): Promise<TranslateResult> {
   // 检查限流（无 userId 时使用 'anonymous' 作为限流 key）
-  const rateLimitKey = userId || 'anonymous';
-  if (!checkRateLimit(rateLimitKey)) {
-    return {
-      success: false,
-      error: 'Rate limit exceeded. Please try again later.',
-    };
+  if (!skipRateLimit) {
+    const rateLimitKey = userId || 'anonymous';
+    if (!checkRateLimit(rateLimitKey)) {
+      return {
+        success: false,
+        error: 'Rate limit exceeded. Please try again later.',
+      };
+    }
   }
 
   // 优先使用自定义翻译 API 或 Deepseek，如果未配置则使用DeepL
@@ -224,17 +227,19 @@ export async function translateBatch(
   targetLang: string,
   userId?: string
 ): Promise<TranslateResult[]> {
-  const results: TranslateResult[] = [];
-
-  for (const text of texts) {
-    const result = await translate({ text, targetLang }, userId);
-    results.push(result);
-
-    // 如果某个翻译失败，停止批量翻译
-    if (!result.success) {
-      break;
-    }
+  const rateLimitKey = userId || 'anonymous';
+  if (!checkRateLimit(rateLimitKey)) {
+    return [
+      {
+        success: false,
+        error: 'Rate limit exceeded. Please try again later.',
+      },
+    ];
   }
 
-  return results;
+  // 并行翻译所有文本，提高性能并跳过子项限流检查
+  const promises = texts.map((text) =>
+    translate({ text, targetLang }, userId, true)
+  );
+  return Promise.all(promises);
 }

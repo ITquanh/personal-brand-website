@@ -106,7 +106,7 @@ export async function GET(request: NextRequest) {
         },
         defaultProvider: deepseekKey ? 'deepseek' : deepLKey ? 'deepl' : null,
         rateLimit: {
-          maxRequests: 10,
+          maxRequests: 60,
           windowMs: 60000,
         },
       },

@@ -106,6 +106,8 @@ export default function AboutAdminPage() {
   // AI 翻译单个字段
   const translateField = async (zhKey: keyof AboutData, enKey: keyof AboutData, fieldName: string) => {
     setTranslatingField(fieldName);
+    setError('');
+    setSuccess('');
     const text = data[zhKey] as string;
     if (!text?.trim()) {
       setTranslatingField(null);
@@ -116,17 +118,81 @@ export default function AboutAdminPage() {
       const res = await fetch('/api/translate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, targetLang: 'en' }),
+        body: JSON.stringify({ text, targetLang: 'en', sourceLang: 'zh' }),
       });
-      const result = await res.json();
-      if (result.success && result.translated) {
-        setData(prev => ({ ...prev, [enKey]: result.translated }));
-        setSuccess(`"${fieldName}" 翻译完成！`);
+
+      if (!res.ok) {
+        const errorText = await res.text().catch(() => '翻译请求失败');
+        throw new Error(`服务器错误 (${res.status}): ${errorText}`);
       }
-    } catch {
-      // 翻译失败静默处理
+
+      const result = await res.json();
+      if (result.success && result.data?.translated) {
+        setData(prev => ({ ...prev, [enKey]: result.data.translated }));
+        setSuccess(`"${fieldName}" 翻译完成！`);
+      } else {
+        throw new Error(result.error || '翻译失败');
+      }
+    } catch (err: any) {
+      setError(`"${fieldName}" 翻译失败: ${err.message || '未知错误'}`);
     } finally {
       setTranslatingField(null);
+    }
+  };
+
+  // AI 翻译所有中文字段
+  const handleTranslateAll = async () => {
+    setTranslating(true);
+    setError('');
+    setSuccess('');
+    try {
+      const fieldsToTranslate = [
+        { key: 'siteTitle', zh: data.siteTitle },
+        { key: 'siteDescription', zh: data.siteDescription },
+        { key: 'name', zh: data.name },
+        { key: 'jobTitle', zh: data.jobTitle },
+        { key: 'bio', zh: data.bio },
+      ].filter(f => f.zh.trim() !== '');
+
+      if (fieldsToTranslate.length === 0) {
+        setSuccess('没有需要翻译的内容');
+        return;
+      }
+
+      const res = await fetch('/api/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: fieldsToTranslate.map(f => f.zh),
+          targetLang: 'en',
+          sourceLang: 'zh',
+        }),
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text().catch(() => '翻译请求失败');
+        throw new Error(`服务器错误 (${res.status}): ${errorText}`);
+      }
+
+      const result = await res.json();
+      if (result.success && result.data?.translations) {
+        const updates: Partial<AboutData> = {};
+        fieldsToTranslate.forEach((field, index) => {
+          const translated = result.data.translations[index];
+          if (translated) {
+            const enKey = (field.key + 'En') as keyof AboutData;
+            (updates as any)[enKey] = translated;
+          }
+        });
+        setData(prev => ({ ...prev, ...updates }));
+        setSuccess('一键翻译完成！请检查英文内容后保存。');
+      } else {
+        throw new Error(result.error || '翻译失败');
+      }
+    } catch (err: any) {
+      setError(err.message || '翻译失败，请重试');
+    } finally {
+      setTranslating(false);
     }
   };
 
@@ -231,9 +297,16 @@ export default function AboutAdminPage() {
         </div>
         <div className="flex gap-3">
           <button
+            onClick={handleTranslateAll}
+            disabled={translating}
+            className="px-4 py-2 bg-accent-purple text-background rounded-lg font-medium hover:bg-accent-purple/90 transition-colors disabled:opacity-50"
+          >
+            {translating ? '翻译中...' : '🌐 AI 一键翻译全部'}
+          </button>
+          <button
             onClick={handleSave}
             disabled={saving}
-            className="px-6 py-3 bg-accent-green text-background rounded-lg font-medium hover:bg-accent-green/90 transition-colors disabled:opacity-50"
+            className="px-4 py-2 bg-accent-green text-background rounded-lg font-medium hover:bg-accent-green/90 transition-colors disabled:opacity-50"
           >
             {saving ? '保存中...' : '💾 保存全部配置'}
           </button>
