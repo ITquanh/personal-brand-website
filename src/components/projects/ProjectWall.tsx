@@ -23,13 +23,13 @@ interface ProjectWallProps {
 }
 
 export default function ProjectWall({
-  initialProjects = [],
+  initialProjects,
   locale,
   dict,
   techFilter = null,
 }: ProjectWallProps) {
-  const [projects, setProjects] = useState<Project[]>(initialProjects);
-  const [page, setPage] = useState(initialProjects.length > 0 ? 1 : 0);
+  const [projects, setProjects] = useState<Project[]>(initialProjects || []);
+  const [page, setPage] = useState(initialProjects && initialProjects.length > 0 ? 1 : 0);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState(false);
@@ -82,7 +82,9 @@ export default function ProjectWall({
 
   // 父组件更新 initialProjects 时同步
   useEffect(() => {
-    setProjects(initialProjects);
+    if (initialProjects) {
+      setProjects(initialProjects);
+    }
   }, [initialProjects]);
 
   // 筛选条件变化时重置列表
@@ -127,7 +129,7 @@ export default function ProjectWall({
 
   // 初始加载
   useEffect(() => {
-    if (initialProjects.length === 0 && !error) {
+    if ((!initialProjects || initialProjects.length === 0) && !error) {
       loadMore();
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
