@@ -112,12 +112,16 @@ export default function AdminProjectsPage() {
                   )}
                   <span
                     className={`text-xs px-2 py-1 rounded-full ${
-                      project.translationStatus === 'translated'
+                      project.translationStatus === 'reviewed'
+                        ? 'bg-purple-500/20 text-purple-400'
+                        : project.translationStatus === 'translated'
                         ? 'bg-green-500/20 text-green-400'
                         : 'bg-yellow-500/20 text-yellow-400'
                     }`}
                   >
-                    {project.translationStatus === 'translated'
+                    {project.translationStatus === 'reviewed'
+                      ? '已审核'
+                      : project.translationStatus === 'translated'
                       ? '已翻译'
                       : '未翻译'}
                   </span>

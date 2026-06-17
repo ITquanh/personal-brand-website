@@ -164,7 +164,7 @@ export default function ProjectDetail({
           className="mb-12"
         >
           <h2 className="text-2xl font-bold mb-6">
-            {dict.projects.techStack} & 架构设计
+            {dict.projects.architecture}
           </h2>
           <div className="glass-card p-8">
             <div className="prose prose-invert max-w-none">
@@ -189,7 +189,7 @@ export default function ProjectDetail({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* 技术栈详情 */}
           <div className="glass-card p-6">
-            <h3 className="text-lg font-bold mb-4">技术栈</h3>
+            <h3 className="text-lg font-bold mb-4">{dict.projects.techStack}</h3>
             <div className="space-y-3">
               {(project.techStack ?? []).map((tech, index) => (
                 <div
@@ -205,33 +205,35 @@ export default function ProjectDetail({
 
           {/* 项目信息 */}
           <div className="glass-card p-6">
-            <h3 className="text-lg font-bold mb-4">项目信息</h3>
+            <h3 className="text-lg font-bold mb-4">{dict.projects.projectInfo}</h3>
             <div className="space-y-3">
               {project.createdAt && (
                 <div className="flex justify-between">
-                  <span className="text-foreground/60">创建时间</span>
+                  <span className="text-foreground/60">{dict.projects.createdAt}</span>
                   <span>{new Date(project.createdAt).toLocaleDateString()}</span>
                 </div>
               )}
               {project.updatedAt && (
                 <div className="flex justify-between">
-                  <span className="text-foreground/60">更新时间</span>
+                  <span className="text-foreground/60">{dict.projects.updatedAt}</span>
                   <span>{new Date(project.updatedAt).toLocaleDateString()}</span>
                 </div>
               )}
               {project.translationStatus && (
                 <div className="flex justify-between">
-                  <span className="text-foreground/60">翻译状态</span>
+                  <span className="text-foreground/60">{dict.projects.translationStatus}</span>
                   <span
                     className={
-                      project.translationStatus === 'translated'
+                      project.translationStatus === 'translated' || project.translationStatus === 'reviewed'
                         ? 'text-accent-green'
                         : 'text-foreground/40'
                     }
                   >
-                    {project.translationStatus === 'translated'
-                      ? '已翻译'
-                      : '未翻译'}
+                    {project.translationStatus === 'reviewed'
+                      ? dict.projects.statusReviewed
+                      : project.translationStatus === 'translated'
+                      ? dict.projects.statusTranslated
+                      : dict.projects.statusUntranslated}
                   </span>
                 </div>
               )}

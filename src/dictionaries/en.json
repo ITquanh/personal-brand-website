@@ -43,7 +43,15 @@
     "viewProject": "View Project",
     "viewCode": "View Code",
     "liveDemo": "Live Demo",
-    "impact": "Quantified Impact"
+    "impact": "Quantified Impact",
+    "architecture": "Architecture & Design",
+    "projectInfo": "Project Info",
+    "createdAt": "Created At",
+    "updatedAt": "Updated At",
+    "translationStatus": "Translation Status",
+    "statusTranslated": "Translated",
+    "statusUntranslated": "Untranslated",
+    "statusReviewed": "Reviewed"
   },
   "blog": {
     "title": "Blog & Tutorials",

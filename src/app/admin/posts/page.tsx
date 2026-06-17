@@ -116,12 +116,16 @@ export default function AdminPostsPage() {
                   </span>
                   <span
                     className={`text-xs px-2 py-1 rounded-full ${
-                      post.translationStatus === 'translated'
+                      post.translationStatus === 'reviewed'
+                        ? 'bg-purple-500/20 text-purple-400'
+                        : post.translationStatus === 'translated'
                         ? 'bg-blue-500/20 text-blue-400'
                         : 'bg-gray-500/20 text-gray-400'
                     }`}
                   >
-                    {post.translationStatus === 'translated'
+                    {post.translationStatus === 'reviewed'
+                      ? '已审核'
+                      : post.translationStatus === 'translated'
                       ? '已翻译'
                       : '未翻译'}
                   </span>

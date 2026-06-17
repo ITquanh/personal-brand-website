@@ -343,6 +343,28 @@ export default function ProjectForm({
             className="w-full px-4 py-2 bg-card-bg border border-card-border rounded-lg focus:outline-none focus:border-accent-green font-mono text-sm"
             placeholder="支持Markdown格式"
           />
+          <TranslateButton
+            content={formData.architectureZh}
+            targetField="architectureEn"
+            onTranslated={(translated) =>
+              setFormData((prev) => ({ ...prev, architectureEn: translated }))
+            }
+          />
+        </div>
+
+        {/* 英文架构解析 */}
+        <div className="md:col-span-2">
+          <label className="block text-sm font-medium mb-2">
+            英文架构解析
+          </label>
+          <textarea
+            name="architectureEn"
+            value={formData.architectureEn}
+            onChange={handleChange}
+            rows={6}
+            className="w-full px-4 py-2 bg-card-bg border border-card-border rounded-lg focus:outline-none focus:border-accent-green font-mono text-sm"
+            placeholder="Supports Markdown format"
+          />
         </div>
 
         {/* GitHub URL */}
