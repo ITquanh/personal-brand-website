@@ -23,10 +23,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('记录访问失败:', error);
     return NextResponse.json(
-      { success: false, error: '记录访问失败' },
+      { 
+        success: false, 
+        error: '记录访问失败', 
+        message: error?.message || String(error),
+        stack: error?.stack 
+      },
       { status: 500 }
     );
   }

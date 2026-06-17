@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 
+export const dynamic = 'force-dynamic';
+
 // 安全解析 JSON 字符串（SQLite 把数组存为 JSON 字符串）
 function safeParseJson(value: any, fallback: any = []): any {
   if (Array.isArray(value)) return value;

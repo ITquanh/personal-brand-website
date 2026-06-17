@@ -22,6 +22,7 @@ export async function recordVisit(data: VisitData): Promise<void> {
     });
   } catch (error) {
     console.error('记录访问失败:', error);
+    throw error;
   }
 }
 
@@ -56,10 +57,10 @@ export async function getAnalyticsStats(days: number = 30) {
 
   // 每日访问量（使用原始查询按日期分组，而非完整时间戳）
   const dailyVisitsRaw = await prisma.$queryRaw<{ date: Date; count: bigint }[]>`
-    SELECT DATE(createdAt) as date, COUNT(id) as count
+    SELECT DATE("createdAt") as date, COUNT(id) as count
     FROM "Visit"
-    WHERE createdAt >= ${startDate}
-    GROUP BY DATE(createdAt)
+    WHERE "createdAt" >= ${startDate}
+    GROUP BY DATE("createdAt")
     ORDER BY date ASC
   `;
 

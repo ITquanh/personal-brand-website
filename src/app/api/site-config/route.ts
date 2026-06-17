@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { siteConfig as defaultSiteConfig } from '@/config/site';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/site-config — 读取公开的站点配置和时间线（供前台页面使用）
  */

@@ -70,13 +70,13 @@ export async function POST(request: NextRequest) {
       await prisma.timelineEvent.create({
         data: {
           date: item.date || '',
-          titleZh: item.titleZh || item.title || '',
+          titleZh: item.title || item.titleZh || '',
           titleEn: item.titleEn || '',
-          companyZh: item.companyZh || item.company || '',
+          companyZh: item.company || item.companyZh || '',
           companyEn: item.companyEn || '',
-          descriptionZh: item.descriptionZh || item.description || '',
+          descriptionZh: item.description || item.descriptionZh || '',
           descriptionEn: item.descriptionEn || '',
-          achievementsZh: JSON.stringify(item.achievementsZh || item.achievements || []),
+          achievementsZh: JSON.stringify(item.achievements || item.achievementsZh || []),
           achievementsEn: JSON.stringify(item.achievementsEn || []),
           type: item.type || 'work',
           order: i,

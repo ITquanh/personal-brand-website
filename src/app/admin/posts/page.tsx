@@ -130,9 +130,14 @@ export default function AdminPostsPage() {
                       : '未翻译'}
                   </span>
                 </div>
-                <p className="text-sm text-foreground/60 mb-2 line-clamp-1">
-                  {post.summaryZh}
+                <p className="text-sm text-foreground/60 mb-1 line-clamp-1">
+                  <span className="text-foreground/40 mr-1">🇨🇳 摘要:</span> {post.summaryZh}
                 </p>
+                {post.summaryEn && (
+                  <p className="text-sm text-foreground/60 mb-2 line-clamp-1">
+                    <span className="text-foreground/40 mr-1">🇬🇧 Summary:</span> {post.summaryEn}
+                  </p>
+                )}
                 <div className="flex items-center gap-4 text-xs text-foreground/40">
                   <span>{post.readTime} 分钟阅读</span>
                   <span>{post.viewCount} 次阅读</span>
