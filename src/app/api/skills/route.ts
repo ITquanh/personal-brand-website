@@ -33,9 +33,15 @@ export async function GET(request: NextRequest) {
       ],
     });
 
+    // 解析 projects 为 JSON 数组
+    const formattedSkills = skills.map((skill) => ({
+      ...skill,
+      projects: safeParseJson(skill.projects, []),
+    }));
+
     return NextResponse.json({
       success: true,
-      data: skills,
+      data: formattedSkills,
     });
   } catch (error) {
     console.error('获取技术栈列表失败:', error);
@@ -111,7 +117,7 @@ export async function POST(request: NextRequest) {
         category: body.category,
         proficiency: body.proficiency,
         description: body.description,
-        projects: Array.isArray(body.projects) ? body.projects : [],
+        projects: Array.isArray(body.projects) ? JSON.stringify(body.projects) : body.projects || "[]",
       },
     });
 

@@ -36,9 +36,14 @@ export async function GET(
       );
     }
 
+    const formattedSkill = {
+      ...skill,
+      projects: safeParseJson(skill.projects, []),
+    };
+
     return NextResponse.json({
       success: true,
-      data: skill,
+      data: formattedSkill,
     });
   } catch (error) {
     console.error('获取技术栈详情失败:', error);
@@ -114,13 +119,18 @@ export async function PUT(
         category: body.category,
         proficiency: body.proficiency,
         description: body.description,
-        projects: body.projects,
+        projects: body.projects ? (Array.isArray(body.projects) ? JSON.stringify(body.projects) : body.projects) : undefined,
       },
     });
 
+    const formattedSkill = {
+      ...skill,
+      projects: safeParseJson(skill.projects, []),
+    };
+
     return NextResponse.json({
       success: true,
-      data: skill,
+      data: formattedSkill,
     });
   } catch (error) {
     console.error('更新技术栈失败:', error);
