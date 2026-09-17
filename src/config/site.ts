@@ -27,8 +27,8 @@ export const siteConfig = {
 
   // ========== 联系方式 ==========
   github: {
-    username: 'HackBit',
-    url: 'https://github.com/HackBit',
+    username: 'ITquanh',
+    url: 'https://github.com/ITquanh',
   },
   email: 'your@email.com',
   linkedin: {
